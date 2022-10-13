@@ -1,19 +1,34 @@
-const express = require('express')
-const app = express()
-const port = 3000
-const path=require("path")
-let publicPath= path.resolve(__dirname,"public")
-app.use(express.static(publicPath))
-app.get('/random/:min/:max', sendrandom)
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-function sendrandom(req, res) {
-    let min = parseInt(req.params.min);
-    let max = parseInt(req.params.max);
-    if (isNaN(min) || isNaN(max)) {
-        res.status(400);
-        res.json( {error : "Bad Request."});
-        return;
+require('dotenv').config()
+const express = require("express");
+var cors = require('cors')
+var app = express()
+app.use(cors())
+app.use(express.json())
+const axios = require("axios")
+
+const port = 3000;
+
+const path = require('path');
+
+let publicPath = path.resolve(__dirname, "public");
+
+app.use(express.static(publicPath));
+app.use(cors());
+
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+});
+
+//passing location
+app.get("/async/:location", async (req, res) => {
+    try {
+        const cityName = req.params.location
+        let response = await axios("http://api.openweathermap.org/data/2.5/forecast?q="+ cityName+"&APPID=" + process.env.OPEN_WEATHER_KEY );
+
+        res.status(200).send(response.data.list);
+    } catch (err) {
+        res.status(500).json({ message: err });
     }
-    let result = Math.round( (Math.random() * (max - min)) + min);
-    res.json( { result : result });
-}
+});
+
+app.listen(port, () => console.log(`Listening on port ${port}!`));
