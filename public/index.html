@@ -1,12 +1,15 @@
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <div id="app">
-    <h1>Welcome to the Random Number Generator</h1>
-    <button v-on:click="getWeather2">Generate Random Number</button>
+    <p>
+        Input a city:
+        <input v-model="question" />
+    </p>
+    <p>{{ answer }}</p>
+    <button v-on:click="getWeather">Get Weather</button>
 </div>
 
 <script>
-    import axios from "axios";
 
     var app = new Vue({
         el: '#app',
@@ -17,22 +20,19 @@
         watch: {
             // whenever question changes, this function will run
             question(newQuestion, oldQuestion) {
-
                 console.log("new question is ", newQuestion)
-
             }
         },
         methods: {
-            async getWeather2() {
-
-
-                fetch('http://localhost:3000/async/London')
+            async getWeather() {
+                console.log("city is ", this.question)
+                fetch(`http://localhost:3000/async/${this.question}`)
                     .then(response => {
-                        console.log("hello wor")
-                        this.answer = response.data[0].main
-
-                    })
-
+                        return response.json()
+                    }).then(a => {
+                    this.answer = a
+                        console.log(a)
+                })
             }
 
         }

@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 app.get("/async/:location", async (req, res) => {
     try {
         const cityName = req.params.location
-        let response = await axios("http://api.openweathermap.org/data/2.5/forecast?q="+ cityName+"&APPID=" + process.env.OPEN_WEATHER_KEY );
+        let response = await axios("http://api.openweathermap.org/data/2.5/forecast?q="+ cityName+"&APPID="+process.env.OPEN_WEATHER_KEY );
 
         res.status(200).send(response.data.list);
     } catch (err) {
