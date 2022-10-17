@@ -23,9 +23,36 @@ app.get('/', (req, res) => {
 app.get("/async/:location", async (req, res) => {
     try {
         const cityName = req.params.location
-        let response = await axios("http://api.openweathermap.org/data/2.5/forecast?q="+ cityName+"&APPID="+process.env.OPEN_WEATHER_KEY );
+        //hash map to store weather forecast for each date
+        let weatherForecast = {};
+        let rainForecasted = false;
+        await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
+            cityName+"&APPID="+process.env.OPEN_WEATHER_KEY ).then(
+            response => {
+                    let weatherList = response.data.list;
+                    for (index in weatherList) {
 
-        res.status(200).send(response.data.list);
+                        let date = response.data.list[index].dt;
+
+                        if (!weatherForecast[date]) {
+                            weatherForecast[date] = {
+                                temperatures: [],
+                                rainForecasted: false,
+                            }
+                        }
+
+                        weatherForecast[date].temperatures.push(weatherList[index].main.temp);
+
+                        if (weatherList[index].rain && weatherList[index].rain['3h']) {
+                            rainForecasted = true;
+                            weatherForecast[date].rainForecasted = true;
+                        }
+                    }
+                }
+        );
+
+      res.status(200).json({ weatherForecast: weatherForecast} );
+
     } catch (err) {
         res.status(500).json({ message: err });
     }
