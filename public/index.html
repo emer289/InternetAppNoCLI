@@ -30,8 +30,8 @@
                     .then(response => {
                         return response.json()
                     }).then(a => {
-                    this.answer = a
-                        console.log(a)
+                    this.answer = a.weatherForecast
+                        console.log(a.weatherForecast)
                 })
             }
 

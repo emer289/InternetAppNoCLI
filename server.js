@@ -25,27 +25,28 @@ app.get("/async/:location", async (req, res) => {
         const cityName = req.params.location
         //hash map to store weather forecast for each date
         let weatherForecast = {};
-        let rainForecasted = false;
-        await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
+        let rainForecasted = "no rain this weekend wahoo!";
+        let response = await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
             cityName+"&APPID="+process.env.OPEN_WEATHER_KEY ).then(
             response => {
                     let weatherList = response.data.list;
                     for (index in weatherList) {
-
-                        let date = response.data.list[index].dt;
+                        let date = new Date(response.data.list[index].dt * 1000);
+                        date.setHours(0, 0, 0, 0);
+                      //date = date.toLocaleDateString();
 
                         if (!weatherForecast[date]) {
                             weatherForecast[date] = {
                                 temperatures: [],
-                                rainForecasted: false,
+                                rainForecasted: rainForecasted
                             }
                         }
 
                         weatherForecast[date].temperatures.push(weatherList[index].main.temp);
 
-                        if (weatherList[index].rain && weatherList[index].rain['3h']) {
-                            rainForecasted = true;
-                            weatherForecast[date].rainForecasted = true;
+                        if (weatherList[index].rain) {
+                            rainForecasted = "unfortunately it's raining over the next 4 day, BRING AN UMBRELLA ";
+                            weatherForecast[date].rainForecasted = rainForecasted;
                         }
                     }
                 }
