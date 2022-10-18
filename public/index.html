@@ -12,6 +12,7 @@
     <p>{{bringMask}}</p>
     <button v-on:click="getWeather">Get Weather</button>
 
+
     <table v-if="weatherForecast != 'which city would you like to know the weather of'">
         <tr v-if="weatherForecast != 'which city would you like to know the weather of'">
             <th>Date</th>
@@ -52,7 +53,7 @@
         methods: {
             async getWeather() {
                 console.log("city is ", this.question)
-                fetch(`http://localhost:3000/${this.question}`)
+                fetch(`http://localhost:3000/weather/${this.question}`)
                     .then(response => {
                         return response.json()
                     }).then(a => {
@@ -62,10 +63,11 @@
                     this.packCold = a.packCold
                     this.packWarm = a.packWarm
                     this.packHot = a.packHot
-                    console.log("airQuality is ", a.airQualityForecast)
                     this.bringMask = a.needMask
                 })
             },
+
+
 
         }
     })

@@ -16,7 +16,7 @@ let publicPath = path.resolve(__dirname, "public");
 let weatherForecast = {};
 let airQualityForecast = {};
 
-let rainForecasted = "no rain this weekend wahoo!";
+let rainForecasted = "no rain this weekend";
 let packCold = null;
 let packWarm = null;
 let packHot = null;
@@ -25,19 +25,16 @@ let needMask = null;
 app.use(express.static(publicPath));
 app.use(cors());
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-});
 
 //passing location
-app.get("/:location", async (req, res) => {
+app.get("/weather/:location", async (req, res) => {
     try {
         const cityName = req.params.location
 
         let lat = null;
         let lon = null;
 
-        await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
+       await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
             cityName+"&APPID="+process.env.OPEN_WEATHER_KEY +"&units=metric").then(
             async response => {
                 let weatherList = response.data.list;
@@ -61,7 +58,9 @@ app.get("/:location", async (req, res) => {
           packHot: packHot,
           packWarm: packWarm,
           airQualityForecast: airQualityForecast,
-          needMask: needMask
+          needMask: needMask,
+
+
 
       });
 
@@ -80,6 +79,34 @@ app.get("/:location", async (req, res) => {
         res.status(500).json({ message: err });
     }
 });
+
+
+app.get('/translation', async (req, res) => {
+    const axios = require("axios");
+
+    const encodedParams = new URLSearchParams();
+    encodedParams.append("q", "Hello, world!");
+    encodedParams.append("target", "es");
+    encodedParams.append("source", "en");
+
+    const options = {
+        method: 'POST',
+        url: 'https://google-translate1.p.rapidapi.com/language/translate/v2',
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'Accept-Encoding': 'application/gzip',
+            'X-RapidAPI-Key': '8f156ebb4cmshdeeb91530a935fcp17f29cjsn6a8129b54a09',
+            'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
+        },
+        data: encodedParams
+    };
+
+    axios.request(options).then(function (response) {
+        console.log(response.data.data);
+    }).catch(function (error) {
+        console.error(error);
+    });
+})
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
 
