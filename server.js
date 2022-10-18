@@ -26,6 +26,10 @@ app.get("/async/:location", async (req, res) => {
         //hash map to store weather forecast for each date
         let weatherForecast = {};
         let rainForecasted = "no rain this weekend wahoo!";
+        let packCold = false;
+        let packWarm = false;
+        let packHot = false;
+
         await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
             cityName+"&APPID="+process.env.OPEN_WEATHER_KEY +"&units=metric").then(
             response => {
@@ -54,20 +58,28 @@ app.get("/async/:location", async (req, res) => {
                         weatherForecast[date].windSpeeds.push(weatherList[weatherIndex].wind.speed)
                         weatherForecast[date].windSpeedsAverage = getAverage(weatherForecast[date].windSpeeds)
 
-
-
                         if (weatherList[weatherIndex].rain && weatherList[weatherIndex].rain['3h']) {
                             rainForecasted = "unfortunately it's raining over the next 4 day, BRING AN UMBRELLA ";
                             weatherForecast[date].rainForecasted = rainForecasted;
                             weatherForecast[date].rainFallLevel.push(weatherList[weatherIndex].rain['3h'])
                             weatherForecast[date].rainFallLevelAverage = (weatherForecast[date].rainFallLevel).reduce((partialSum, a) => partialSum + a, 0)
                         }
+                        if((weatherForecast[date].temperatures).some(a => a<12) ){
+                            packCold = true;
+                        }else if ((weatherForecast[date].temperatures).some(a => a>12 && a<24) ){
+                            packWarm = true;
+                        }else if((weatherForecast[date].temperatures).some(a => a>24)){
+                            packHot = true;
+                        }
                     }
                 }
         );
 
       res.status(200).json({ weatherForecast: weatherForecast,
-          rainForecasted: rainForecasted
+          rainForecasted: rainForecasted,
+          packCold: packCold,
+          packHot: packHot,
+          packWarm: packWarm
       });
 
     } catch (err) {

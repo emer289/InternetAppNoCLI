@@ -6,6 +6,7 @@
         <input v-model="question" />
     </p>
     <p>{{ rainString }}</p>
+    <p>{{ packCold }}</p>
     <button v-on:click="getWeather">Get Weather</button>
 
     <table v-if="weatherForecast != 'which city would you like to know the weather of'">
@@ -33,6 +34,7 @@
             question: '',
             weatherForecast: 'which city would you like to know the weather of',
             rainString: null,
+            packCold: false
 
         },
         watch: {
@@ -51,6 +53,7 @@
                     this.weatherForecast = a.weatherForecast
                         console.log(a.weatherForecast)
                     this.rainString = a.rainForecasted
+                    this.packCold = a.packCold
                 })
             }
 
