@@ -82,8 +82,8 @@ app.get("/weather/:location", async (req, res) => {
 
 
 app.get('/translation', async (req, res) => {
-    const axios = require("axios");
 
+    console.log(req.query)
     const encodedParams = new URLSearchParams();
     encodedParams.append("q", "Hello, world!");
     encodedParams.append("target", "es");
@@ -100,7 +100,7 @@ app.get('/translation', async (req, res) => {
         },
         data: encodedParams
     };
-
+    console.log(encodedParams);
     axios.request(options).then(function (response) {
         console.log(response.data.data);
         res.status(200).json({

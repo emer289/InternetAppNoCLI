@@ -33,7 +33,6 @@
 </div>
 
 <script>
-
     var app = new Vue({
         el: '#app',
         data: {
@@ -70,14 +69,18 @@
                 })
             },
             async getTranslation() {
-                fetch('http://localhost:3000/translation')
-                    .then(response => {
-                        return response.json()
-                    }).then(a => {
-                    this.spanish = a.spanish
-                    console.log("response is ", a )
 
-                })
+                const url = (
+                    'http://localhost:3000/translation?' +
+                    new URLSearchParams({ postId: 1 }).toString()
+                );
+
+                const result = await fetch(url)
+                    .then(response => response.json());
+
+                console.log('Fetched from: ' + url);
+                console.log(result);
+
             },
 
 
