@@ -13,11 +13,13 @@
             <th>Date</th>
             <th>Temp</th>
             <th>Wind Speed</th>
+            <th>Rainfall</th>
         </tr>
         <tr v-for="(weatherIndex, date) in weatherForecast">
             <th>{{ date }}</th>
             <td>{{weatherIndex.temperatureAverage}}</td>
             <td>{{weatherIndex.windSpeedsAverage}}</td>
+            <td>{{weatherIndex.rainFallLevelAverage}}</td>
         </tr>
 
     </table>

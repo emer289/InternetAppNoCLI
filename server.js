@@ -40,7 +40,9 @@ app.get("/async/:location", async (req, res) => {
                                 temperatures: [],
                                 temperatureAverage: null,
                                 windSpeeds: [],
-                                windSpeedsAverage: null
+                                windSpeedsAverage: null,
+                                rainFallLevel: [],
+                                rainFallLevelAverage: null,
 
                             }
                         }
@@ -52,9 +54,13 @@ app.get("/async/:location", async (req, res) => {
                         weatherForecast[date].windSpeeds.push(weatherList[weatherIndex].wind.speed)
                         weatherForecast[date].windSpeedsAverage = getAverage(weatherForecast[date].windSpeeds)
 
+
+
                         if (weatherList[weatherIndex].rain && weatherList[weatherIndex].rain['3h']) {
                             rainForecasted = "unfortunately it's raining over the next 4 day, BRING AN UMBRELLA ";
                             weatherForecast[date].rainForecasted = rainForecasted;
+                            weatherForecast[date].rainFallLevel.push(weatherList[weatherIndex].rain['3h'])
+                            weatherForecast[date].rainFallLevelAverage = (weatherForecast[date].rainFallLevel).reduce((partialSum, a) => partialSum + a, 0)
                         }
                     }
                 }
