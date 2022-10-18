@@ -11,6 +11,8 @@
     <p>{{ packHot }}</p>
     <p>{{bringMask}}</p>
     <button v-on:click="getWeather">Get Weather</button>
+    <button v-on:click="getTranslation">Translate</button>
+
 
 
     <table v-if="weatherForecast != 'which city would you like to know the weather of'">
@@ -42,6 +44,7 @@
             packWarm: null,
             packHot: null,
             bringMask: null,
+            spanish: null
 
         },
         watch: {
@@ -64,6 +67,16 @@
                     this.packWarm = a.packWarm
                     this.packHot = a.packHot
                     this.bringMask = a.needMask
+                })
+            },
+            async getTranslation() {
+                fetch('http://localhost:3000/translation')
+                    .then(response => {
+                        return response.json()
+                    }).then(a => {
+                    this.spanish = a.spanish
+                    console.log("response is ", a )
+
                 })
             },
 

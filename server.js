@@ -103,6 +103,9 @@ app.get('/translation', async (req, res) => {
 
     axios.request(options).then(function (response) {
         console.log(response.data.data);
+        res.status(200).json({
+            spanish: response.data.data
+        })
     }).catch(function (error) {
         console.error(error);
     });
