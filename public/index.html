@@ -5,8 +5,20 @@
         Input a city:
         <input v-model="question" />
     </p>
-    <p>{{ answer }}</p>
+    <p>{{ rainString }}</p>
     <button v-on:click="getWeather">Get Weather</button>
+
+    <table v-if="weatherForecast != 'which city would you like to know the weather of'">
+        <tr>
+            <th>Date</th>
+            <th>Temp</th>
+        </tr>
+        <tr v-for="(weatherIndex, date) in weatherForecast">
+            <th>{{ date }}</th>
+            <td>{{weatherIndex.temperatureAverage}}</td>
+        </tr>
+
+    </table>
 </div>
 
 <script>
@@ -15,7 +27,9 @@
         el: '#app',
         data: {
             question: '',
-            answer: 'which city would you like to know the weather of'
+            weatherForecast: 'which city would you like to know the weather of',
+            rainString: null,
+
         },
         watch: {
             // whenever question changes, this function will run
@@ -30,8 +44,9 @@
                     .then(response => {
                         return response.json()
                     }).then(a => {
-                    this.answer = a.weatherForecast
+                    this.weatherForecast = a.weatherForecast
                         console.log(a.weatherForecast)
+                    this.rainString = a.rainForecasted
                 })
             }
 

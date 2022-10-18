@@ -26,25 +26,32 @@ app.get("/async/:location", async (req, res) => {
         //hash map to store weather forecast for each date
         let weatherForecast = {};
         let rainForecasted = "no rain this weekend wahoo!";
-        let response = await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
-            cityName+"&APPID="+process.env.OPEN_WEATHER_KEY ).then(
+        await axios("http://api.openweathermap.org/data/2.5/forecast?q="+
+            cityName+"&APPID="+process.env.OPEN_WEATHER_KEY +"&units=metric").then(
             response => {
                     let weatherList = response.data.list;
-                    for (index in weatherList) {
-                        let date = new Date(response.data.list[index].dt * 1000);
+                    for (weatherIndex in weatherList) {
+                        let date = new Date(response.data.list[weatherIndex].dt * 1000);
                         date.setHours(0, 0, 0, 0);
                       //date = date.toLocaleDateString();
 
                         if (!weatherForecast[date]) {
                             weatherForecast[date] = {
                                 temperatures: [],
-                                rainForecasted: rainForecasted
+                                temperatureAverage: null,
+                                windSpeeds: [],
+                                windSpeedsAverage: null
+
                             }
                         }
 
-                        weatherForecast[date].temperatures.push(weatherList[index].main.temp);
+                        weatherForecast[date].temperatures.push(weatherList[weatherIndex].main.temp);
+                        //computing the average temp
+                        weatherForecast[date].temperatureAverage = getAverage(weatherForecast[date].temperatures)
 
-                        if (weatherList[index].rain) {
+
+
+                        if (weatherList[weatherIndex].rain) {
                             rainForecasted = "unfortunately it's raining over the next 4 day, BRING AN UMBRELLA ";
                             weatherForecast[date].rainForecasted = rainForecasted;
                         }
@@ -52,7 +59,9 @@ app.get("/async/:location", async (req, res) => {
                 }
         );
 
-      res.status(200).json({ weatherForecast: weatherForecast} );
+      res.status(200).json({ weatherForecast: weatherForecast,
+          rainForecasted: rainForecasted
+      });
 
     } catch (err) {
         res.status(500).json({ message: err });
@@ -60,3 +69,8 @@ app.get("/async/:location", async (req, res) => {
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
+
+function getAverage(array){
+    return (array.reduce((partialSum, a) => partialSum + a, 0))
+        /(array.length)
+}
