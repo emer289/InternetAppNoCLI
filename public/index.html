@@ -9,13 +9,15 @@
     <button v-on:click="getWeather">Get Weather</button>
 
     <table v-if="weatherForecast != 'which city would you like to know the weather of'">
-        <tr>
+        <tr v-if="weatherForecast != 'which city would you like to know the weather of'">
             <th>Date</th>
             <th>Temp</th>
+            <th>Wind Speed</th>
         </tr>
         <tr v-for="(weatherIndex, date) in weatherForecast">
             <th>{{ date }}</th>
             <td>{{weatherIndex.temperatureAverage}}</td>
+            <td>{{weatherIndex.windSpeedsAverage}}</td>
         </tr>
 
     </table>

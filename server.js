@@ -49,9 +49,10 @@ app.get("/async/:location", async (req, res) => {
                         //computing the average temp
                         weatherForecast[date].temperatureAverage = getAverage(weatherForecast[date].temperatures)
 
+                        weatherForecast[date].windSpeeds.push(weatherList[weatherIndex].wind.speed)
+                        weatherForecast[date].windSpeedsAverage = getAverage(weatherForecast[date].windSpeeds)
 
-
-                        if (weatherList[weatherIndex].rain) {
+                        if (weatherList[weatherIndex].rain && weatherList[weatherIndex].rain['3h']) {
                             rainForecasted = "unfortunately it's raining over the next 4 day, BRING AN UMBRELLA ";
                             weatherForecast[date].rainForecasted = rainForecasted;
                         }
