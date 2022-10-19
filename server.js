@@ -83,9 +83,10 @@ app.get("/weather/:location", async (req, res) => {
 
 app.get('/translation', async (req, res) => {
 
-    console.log(req.query)
+    const {text} = req.query
+    console.log("text is ", text)
     const encodedParams = new URLSearchParams();
-    encodedParams.append("q", "Hello, world!");
+    encodedParams.append("q",text.toString());
     encodedParams.append("target", "es");
     encodedParams.append("source", "en");
 
@@ -95,7 +96,7 @@ app.get('/translation', async (req, res) => {
         headers: {
             'content-type': 'application/x-www-form-urlencoded',
             'Accept-Encoding': 'application/gzip',
-            'X-RapidAPI-Key': '8f156ebb4cmshdeeb91530a935fcp17f29cjsn6a8129b54a09',
+            'X-RapidAPI-Key': '6b4ceaf2camsh6c928bc244bd887p17b167jsn7e6b3315ac71',
             'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
         },
         data: encodedParams
@@ -114,6 +115,7 @@ app.get('/translation', async (req, res) => {
 app.listen(port, () => console.log(`Listening on port ${port}!`));
 
 async function getAirPollutionValue(lon, lat) {
+
     await axios("http://api.openweathermap.org/data/2.5/air_pollution/" +
         "forecast?lat=" + lat + "&lon=" + lon + "&appid=" + process.env.OPEN_WEATHER_KEY).then(
         response => {
@@ -172,6 +174,8 @@ function getWeatherInfo(weatherList){
             weatherForecast[date].rainForecasted = rainForecasted;
             weatherForecast[date].rainFallLevel.push(weatherList[weatherIndex].rain['3h'])
             weatherForecast[date].rainFallLevelAverage = (weatherForecast[date].rainFallLevel).reduce((partialSum, a) => partialSum + a, 0)
+        }else{
+            weatherForecast[date].rainFallLevelAverage = 0
         }
         if((weatherForecast[date].temperatures).some(a => a<12) ){
             packCold = "pack for COLD weather";

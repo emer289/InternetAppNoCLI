@@ -60,7 +60,7 @@
                         return response.json()
                     }).then(a => {
                     this.weatherForecast = a.weatherForecast
-                        console.log(a.weatherForecast)
+                        console.log(a.airQualityForecast)
                     this.rainString = a.rainForecasted
                     this.packCold = a.packCold
                     this.packWarm = a.packWarm
@@ -72,14 +72,13 @@
 
                 const url = (
                     'http://localhost:3000/translation?' +
-                    new URLSearchParams({ postId: 1 }).toString()
+                    new URLSearchParams({ text: this.packWarm }).toString()
                 );
 
                 const result = await fetch(url)
                     .then(response => response.json());
 
-                console.log('Fetched from: ' + url);
-                console.log(result);
+                this.packWarm = result.spanish.translations[0].translatedText
 
             },
 
