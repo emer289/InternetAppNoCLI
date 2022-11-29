@@ -9,27 +9,26 @@ const axios = require("axios")
 const port = 3000;
 
 const path = require('path');
-const {response, query} = require("express");
-
 let publicPath = path.resolve(__dirname, "public");
-//hash map to store weather forecast for each date
+app.use(express.static(publicPath));
+
+//Used to store weather forecast for each date
 let weatherForecast = {};
+//Used to store air quality for each date
 let airQualityForecast = {};
 
-let rainForecasted = "no rain this weekend";
+//init to no rain
+let rainForecasted = "no rain but pack for ";
+
 let packCold = null;
 let packWarm = null;
 let packHot = null;
 let needMask = null;
 
-app.use(express.static(publicPath));
-app.use(cors());
-
-
-//passing location
-app.get("/weather/:location", async (req, res) => {
+//passing location in the url
+app.get("/weather", async (req, res) => {
     try {
-        const cityName = req.params.location
+        const {cityName} = req.query
 
         let lat = null;
         let lon = null;
@@ -38,6 +37,8 @@ app.get("/weather/:location", async (req, res) => {
             cityName+"&APPID="+process.env.OPEN_WEATHER_KEY +"&units=metric").then(
             async response => {
                 let weatherList = response.data.list;
+
+                //retrieving the lat and lon from the response
                 lat = response.data.city.coord.lat;
                 lon = response.data.city.coord.lon;
 
@@ -51,7 +52,7 @@ app.get("/weather/:location", async (req, res) => {
         );
 
 
-
+        //send back weather info
       res.status(200).json({ weatherForecast: weatherForecast,
           rainForecasted: rainForecasted,
           packCold: packCold,
@@ -59,16 +60,13 @@ app.get("/weather/:location", async (req, res) => {
           packWarm: packWarm,
           airQualityForecast: airQualityForecast,
           needMask: needMask,
-
-
-
       });
 
 
+      //init for next search
       weatherForecast = {};
       airQualityForecast = {};
-
-      rainForecasted = "no rain this weekend wahoo!";
+      rainForecasted = "NO RAIN but pack for ";
       packCold = null;
       packWarm = null;
       packHot = null;
@@ -81,11 +79,13 @@ app.get("/weather/:location", async (req, res) => {
 });
 
 
+// extra feature
 app.get('/translation', async (req, res) => {
 
+    //the text to be translated
     const {text} = req.query
-    console.log("text is ", text)
     const encodedParams = new URLSearchParams();
+
     encodedParams.append("q",text.toString());
     encodedParams.append("target", "es");
     encodedParams.append("source", "en");
@@ -96,14 +96,14 @@ app.get('/translation', async (req, res) => {
         headers: {
             'content-type': 'application/x-www-form-urlencoded',
             'Accept-Encoding': 'application/gzip',
-            'X-RapidAPI-Key': '6b4ceaf2camsh6c928bc244bd887p17b167jsn7e6b3315ac71',
-            'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
+            'X-RapidAPI-Key': process.env.RAPID_API_KEY,
+            'X-RapidAPI-Host': process.env.RAPID_API_HOST
         },
         data: encodedParams
     };
-    console.log(encodedParams);
+
     axios.request(options).then(function (response) {
-        console.log(response.data.data);
+
         res.status(200).json({
             spanish: response.data.data
         })
@@ -121,7 +121,10 @@ async function getAirPollutionValue(lon, lat) {
         response => {
             let airQualityList = response.data.list
             for (airQ in airQualityList) {
+
+                //get pretty date
                 let date = new Date(airQualityList[airQ].dt * 1000);
+                // set hours to 0 to be able to group the dates
                 date.setHours(0, 0, 0, 0);
                 date = date.toLocaleDateString();
 
@@ -134,7 +137,7 @@ async function getAirPollutionValue(lon, lat) {
 
                 airQualityForecast[date].pm2_5.push(airQualityList[airQ].components.pm2_5);
                 if((airQualityForecast[date].pm2_5).some(a => a > 10)){
-                    needMask = "bring a mask"
+                    needMask = "and BRING A MASK as air quality is poor :( "
                 }
             }
 
@@ -170,7 +173,7 @@ function getWeatherInfo(weatherList){
         weatherForecast[date].windSpeedsAverage = getAverage(weatherForecast[date].windSpeeds)
 
         if (weatherList[weatherIndex].rain && weatherList[weatherIndex].rain['3h']) {
-            rainForecasted = "unfortunately it's raining over the next 4 day, BRING AN UMBRELLA ";
+            rainForecasted = "Unfortunately rain is forecasted so BRING AN UMBRELLA and pack for ";
             weatherForecast[date].rainForecasted = rainForecasted;
             weatherForecast[date].rainFallLevel.push(weatherList[weatherIndex].rain['3h'])
             weatherForecast[date].rainFallLevelAverage = (weatherForecast[date].rainFallLevel).reduce((partialSum, a) => partialSum + a, 0)
@@ -178,11 +181,11 @@ function getWeatherInfo(weatherList){
             weatherForecast[date].rainFallLevelAverage = 0
         }
         if((weatherForecast[date].temperatures).some(a => a<12) ){
-            packCold = "pack for COLD weather";
+            packCold = "COLD weather ";
         }else if ((weatherForecast[date].temperatures).some(a => a>12 && a<24) ){
-            packWarm = "pack for WARM weather";
+            packWarm = "WARM weather ";
         }else if((weatherForecast[date].temperatures).some(a => a>24)){
-            packHot = "pack for HOT weather";
+            packHot = "HOT weather ";
         }
     }
 

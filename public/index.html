@@ -1,26 +1,33 @@
 <!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <div id="app">
+    <p>Weather Forecaster (Pronóstico del Tiempo)</p>
+
     <p>
-        Input a city:
+        Input a city (Ingrese una cita):
         <input v-model="question" />
     </p>
-    <p>{{ rainString }}</p>
-    <p>{{ packCold }}</p>
-    <p>{{ packWarm }}</p>
-    <p>{{ packHot }}</p>
-    <p>{{bringMask}}</p>
-    <button v-on:click="getWeather">Get Weather</button>
-    <button v-on:click="getTranslation">Translate</button>
+    <p v-if="spanish != null">
+        {{ this.spanish }}
+      </p>
+    <div v-if="spanish == null">
+        {{ description.rainString }}
+       {{ description.packCold }}
+         {{ description.packWarm }}
+        {{ description.packHot }}
+        <p>{{description.bringMask}}</p>
+    </div>
+    <button v-on:click="getWeather">Get Weather (Obtener Tiempo)</button>
+    <button v-on:click="getTranslation">Translate (Traducir)</button>
 
 
 
     <table v-if="weatherForecast != 'which city would you like to know the weather of'">
         <tr v-if="weatherForecast != 'which city would you like to know the weather of'">
             <th>Date</th>
-            <th>Temp</th>
-            <th>Wind Speed</th>
-            <th>Rainfall</th>
+            <th>Avg Temperature (°C)</th>
+            <th>Avg Wind Speed (m/s)</th>
+            <th>Rainfall Level (mm)</th>
         </tr>
         <tr v-for="(weatherIndex, date) in weatherForecast">
             <th>{{ date }}</th>
@@ -38,11 +45,14 @@
         data: {
             question: '',
             weatherForecast: 'which city would you like to know the weather of',
-            rainString: null,
-            packCold: null,
-            packWarm: null,
-            packHot: null,
-            bringMask: null,
+            description: {
+                packWarm: null,
+                rainString: null,
+                packCold: null,
+                packHot: null,
+                bringMask: null,
+            },
+
             spanish: null
 
         },
@@ -55,30 +65,46 @@
         methods: {
             async getWeather() {
                 console.log("city is ", this.question)
-                fetch(`http://localhost:3000/weather/${this.question}`)
+                const url1 = (
+                    'http://localhost:3000/weather/?' +
+                    new URLSearchParams({ cityName: this.question }).toString()
+                );
+
+                fetch(url1)
                     .then(response => {
                         return response.json()
                     }).then(a => {
                     this.weatherForecast = a.weatherForecast
                         console.log(a.airQualityForecast)
-                    this.rainString = a.rainForecasted
-                    this.packCold = a.packCold
-                    this.packWarm = a.packWarm
-                    this.packHot = a.packHot
-                    this.bringMask = a.needMask
+                    this.description.rainString = a.rainForecasted
+                    this.description.packCold = a.packCold
+                    this.description.packWarm = a.packWarm
+                    this.description.packHot = a.packHot
+                    this.description.bringMask = a.needMask
                 })
             },
             async getTranslation() {
 
-                const url = (
-                    'http://localhost:3000/translation?' +
-                    new URLSearchParams({ text: this.packWarm }).toString()
-                );
+                let concatText = "";
 
-                const result = await fetch(url)
-                    .then(response => response.json());
+                console.log(this.description.bringMask)
 
-                this.packWarm = result.spanish.translations[0].translatedText
+                for (const property in this.description) {
+                    concatText = concatText.concat(this.description[property]) + " ";
+                    console.log("text is ", concatText)
+
+                }
+                    const url = (
+                        'http://localhost:3000/translation?' +
+                        new URLSearchParams({ text: concatText }).toString()
+                    );
+
+                    const result = await fetch(url)
+                        .then(response => response.json());
+
+                    this.spanish = result.spanish.translations[0].translatedText
+
+
 
             },
 
