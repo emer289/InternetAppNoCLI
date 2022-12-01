@@ -1,42 +1,57 @@
 <!-- development version, includes helpful console warnings -->
+<style>
+    input[type=text] {
+        width: 130px;
+        box-sizing: border-box;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        background-color: white;
+        background-position: 10px 10px;
+        background-repeat: no-repeat;
+        padding: 12px 20px 12px 12px;
+        transition: width 0.4s ease-in-out;
+    }
+
+    input[type=text]:focus {
+        width: 100%;
+    }
+
+    .button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        margin-right: auto;
+        margin-left: auto;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .center-block {
+        display: block;
+        margin-right: auto;
+        margin-left: auto;
+    }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
 <div id="app">
-    <p>Weather Forecaster (Pronóstico del Tiempo)</p>
+    <h1 style="text-align:center">What city would you like to learn about?</h1>
+    <form>
+        <input class="center-block" type="text" name="search" placeholder="Search.." v-model="question">
+    </form>
 
-    <p>
-        Input a city (Ingrese una cita):
-        <input v-model="question" />
-    </p>
-    <p v-if="spanish != null">
-        {{ this.spanish }}
-      </p>
-    <div v-if="spanish == null">
-        {{ description.rainString }}
-       {{ description.packCold }}
-         {{ description.packWarm }}
-        {{ description.packHot }}
-        <p>{{description.bringMask}}</p>
-    </div>
-    <button v-on:click="getWeather">Get Weather (Obtener Tiempo)</button>
-    <button v-on:click="getTranslation">Translate (Traducir)</button>
+    <p style="text-align:center" v-if="cityInfo != null">City Name: {{ cityInfo.name }}</p>
+    <p style="text-align:center" v-if="cityInfo != null">City Description: {{ cityInfo.description }}</p>
+    <p style="text-align:center" v-if="cityInfo != null">City Population: {{ cityInfo.population }}</p>
+    <button class="button" v-on:click="getWeather">Get Info</button>
 
 
-
-    <table v-if="weatherForecast != 'which city would you like to know the weather of'">
-        <tr v-if="weatherForecast != 'which city would you like to know the weather of'">
-            <th>Date</th>
-            <th>Avg Temperature (°C)</th>
-            <th>Avg Wind Speed (m/s)</th>
-            <th>Rainfall Level (mm)</th>
-        </tr>
-        <tr v-for="(weatherIndex, date) in weatherForecast">
-            <th>{{ date }}</th>
-            <td>{{weatherIndex.temperatureAverage}}</td>
-            <td>{{weatherIndex.windSpeedsAverage}}</td>
-            <td>{{weatherIndex.rainFallLevelAverage}}</td>
-        </tr>
-
-    </table>
 </div>
 
 <script>
@@ -44,16 +59,7 @@
         el: '#app',
         data: {
             question: '',
-            weatherForecast: 'which city would you like to know the weather of',
-            description: {
-                packWarm: null,
-                rainString: null,
-                packCold: null,
-                packHot: null,
-                bringMask: null,
-            },
-
-            spanish: null
+            cityInfo: null,
 
         },
         watch: {
@@ -65,51 +71,15 @@
         methods: {
             async getWeather() {
                 console.log("city is ", this.question)
-                const url1 = (
-                    'http://localhost:3000/weather/?' +
-                    new URLSearchParams({ cityName: this.question }).toString()
-                );
-
-                fetch(url1)
-                    .then(response => {
+                //fetch(`http://localhost:3000/weather/${this.question}`)
+                    fetch(`https://asmq0pm1w1.execute-api.us-east-1.amazonaws.com/prod/cityinfo?location=${this.question}`)
+                        .then(response => {
                         return response.json()
                     }).then(a => {
-                    this.weatherForecast = a.weatherForecast
-                        console.log(a.airQualityForecast)
-                    this.description.rainString = a.rainForecasted
-                    this.description.packCold = a.packCold
-                    this.description.packWarm = a.packWarm
-                    this.description.packHot = a.packHot
-                    this.description.bringMask = a.needMask
+                        this.cityInfo = a;
+                    console.log(a)
                 })
             },
-            async getTranslation() {
-
-                let concatText = "";
-
-                console.log(this.description.bringMask)
-
-                for (const property in this.description) {
-                    concatText = concatText.concat(this.description[property]) + " ";
-                    console.log("text is ", concatText)
-
-                }
-                    const url = (
-                        'http://localhost:3000/translation?' +
-                        new URLSearchParams({ text: concatText }).toString()
-                    );
-
-                    const result = await fetch(url)
-                        .then(response => response.json());
-
-                    this.spanish = result.spanish.translations[0].translatedText
-
-
-
-            },
-
-
-
         }
     })
 
